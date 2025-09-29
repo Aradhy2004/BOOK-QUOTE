@@ -40,7 +40,8 @@ body {
     text-align: center;
     color: white;
     opacity: 1;
-    transition: opacity 0.3s ease-in-out;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
 }
 
 .quote-content {
@@ -71,6 +72,7 @@ body {
     opacity: 0.8;
 }
 
+/* Simplified Controls - Only essential buttons */
 .controls {
     position: absolute;
     bottom: 100px;
@@ -78,7 +80,7 @@ body {
     gap: 20px;
 }
 
-.like-btn, .share-btn {
+.like-btn, .share-btn, .liked-quotes-btn {
     background: rgba(255, 255, 255, 0.2);
     border: none;
     border-radius: 50%;
@@ -90,7 +92,7 @@ body {
     backdrop-filter: blur(10px);
 }
 
-.like-btn:hover, .share-btn:hover {
+.like-btn:hover, .share-btn:hover, .liked-quotes-btn:hover {
     background: rgba(255, 255, 255, 0.3);
     transform: scale(1.1);
 }
@@ -100,6 +102,7 @@ body {
     color: #ff69b4;
 }
 
+/* Navigation - Only Previous/Next */
 .navigation {
     position: absolute;
     bottom: 30px;
@@ -139,8 +142,17 @@ body {
     height: 100%;
     background: white;
     width: 0%;
-    transition: width 0.3s ease;
+    transition: width 7.5s linear;
     border-radius: 2px;
+}
+
+/* Liked view styling */
+.app-container.liked-view .quote-card {
+    background: rgba(255, 105, 180, 0.1);
+}
+
+.app-container.liked-view .progress {
+    background: linear-gradient(90deg, #ff69b4, #ff1493);
 }
 
 /* Responsive Design */
@@ -157,14 +169,16 @@ body {
     .quote-card {
         padding: 30px 20px;
     }
+    
+    .controls {
+        bottom: 80px;
+    }
 }
 
-/* Loading state */
-.app-container:empty::before {
-    content: "Loading quotes...";
-    color: white;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+/* Share notification animation */
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translate(-50%, -60%); }
+    20% { opacity: 1; transform: translate(-50%, -50%); }
+    80% { opacity: 1; transform: translate(-50%, -50%); }
+    100% { opacity: 0; transform: translate(-50%, -40%); }
 }

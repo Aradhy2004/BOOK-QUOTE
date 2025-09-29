@@ -9,7 +9,7 @@
     {
       "id": 2,
       "text": "The only way out is through.",
-      "bookTitle": "A Thousand Acres",
+      "bookTitle": "A Thousand Acres", 
       "author": "Jane Smiley"
     },
     {
@@ -19,7 +19,7 @@
       "author": "F. Scott Fitzgerald"
     },
     {
-      "id": 4,
+      "id": 4, 
       "text": "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
       "bookTitle": "Pride and Prejudice",
       "author": "Jane Austen"
