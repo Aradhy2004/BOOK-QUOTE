@@ -7,7 +7,37 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="app-container">
+    <!-- Login Page -->
+    <div id="login-page" class="login-container">
+        <div class="login-card">
+            <h1>📚 Book Quote Shorts</h1>
+            <p>Discover beautiful quotes from literature</p>
+            
+            <form id="login-form" class="login-form">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="Username" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="login-btn">Enter Library</button>
+            </form>
+            
+            <div class="demo-accounts">
+                <p><strong>Demo Accounts:</strong></p>
+                <p>User: <code>reader</code> | Pass: <code>books123</code></p>
+                <p>User: <code>booklover</code> | Pass: <code>quotes456</code></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App (Hidden Initially) -->
+    <div id="app-container" class="app-container" style="display: none;">
+        <div class="header">
+            <button class="logout-btn">🚪 Logout</button>
+            <h2>Book Quote Shorts</h2>
+        </div>
+        
         <div class="quote-card active">
             <div class="quote-content">
                 <p class="quote-text"></p>
@@ -15,14 +45,12 @@
                 <p class="author"></p>
             </div>
             
-            <!-- Only 3 main action buttons -->
             <div class="controls">
                 <button class="like-btn">❤️</button>
                 <button class="share-btn">📤</button>
                 <button class="liked-quotes-btn">⭐</button>
             </div>
             
-            <!-- Only navigation buttons -->
             <div class="navigation">
                 <button class="nav-btn prev-btn">⬅️</button>
                 <button class="nav-btn next-btn">➡️</button>

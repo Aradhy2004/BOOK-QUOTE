@@ -74,29 +74,54 @@ class BookQuoteShorts {
                 author: "Maya Angelou"
             }
         ];
+        
         this.currentIndex = 0;
         this.isTransitioning = false;
         this.autoPlayInterval = null;
         this.likedQuotes = new Set();
         this.isLikedView = false;
+        this.isLoggedIn = false;
         
         this.init();
     }
     
     init() {
-        this.loadLikedQuotes();
+        this.checkAuthentication();
         this.setupEventListeners();
-        this.showQuote(this.currentIndex);
-        this.startAutoPlay();
+    }
+    
+    checkAuthentication() {
+        // Check if user is already logged in (from previous session)
+        const savedAuth = localStorage.getItem('bookQuotesAuth');
+        if (savedAuth) {
+            const authData = JSON.parse(savedAuth);
+            if (authData.isLoggedIn) {
+                this.showApp();
+                this.loadLikedQuotes();
+                this.showQuote(this.currentIndex);
+                this.startAutoPlay();
+                return;
+            }
+        }
+        
+        // Show login page if not authenticated
+        this.showLogin();
     }
     
     setupEventListeners() {
+        // Login form
+        document.getElementById('login-form').addEventListener('submit', (e) => this.handleLogin(e));
+        
+        // Logout button
+        document.querySelector('.logout-btn').addEventListener('click', () => this.handleLogout());
+        
         // Navigation buttons
         document.querySelector('.next-btn').addEventListener('click', () => this.nextQuote());
         document.querySelector('.prev-btn').addEventListener('click', () => this.prevQuote());
         
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
+            if (!this.isLoggedIn) return;
             if (e.key === 'ArrowRight' || e.key === 'ArrowDown') this.nextQuote();
             if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') this.prevQuote();
         });
@@ -110,11 +135,12 @@ class BookQuoteShorts {
         // Share button
         document.querySelector('.share-btn').addEventListener('click', (e) => this.shareQuote(e));
         
-        // Liked quotes button - toggle view
+        // Liked quotes button
         document.querySelector('.liked-quotes-btn').addEventListener('click', () => this.toggleLikedView());
         
-        // Wheel scroll (like Instagram)
+        // Wheel scroll
         document.addEventListener('wheel', (e) => {
+            if (!this.isLoggedIn) return;
             if (e.deltaY > 0) {
                 this.nextQuote();
             } else {
@@ -123,30 +149,86 @@ class BookQuoteShorts {
         });
     }
     
+    handleLogin(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        
+        // Simple authentication (in real app, this would be server-side)
+        const validUsers = {
+            'reader': 'books123',
+            'booklover': 'quotes456',
+            'admin': 'admin123'
+        };
+        
+        if (validUsers[username] && validUsers[username] === password) {
+            this.isLoggedIn = true;
+            
+            // Save authentication state
+            localStorage.setItem('bookQuotesAuth', JSON.stringify({
+                isLoggedIn: true,
+                username: username,
+                loginTime: new Date().toISOString()
+            }));
+            
+            this.showApp();
+            this.loadLikedQuotes();
+            this.showQuote(this.currentIndex);
+            this.startAutoPlay();
+            
+            this.showNotification(`Welcome, ${username}! 📚`);
+        } else {
+            this.showNotification('Invalid username or password! ❌', true);
+        }
+    }
+    
+    handleLogout() {
+        this.isLoggedIn = false;
+        localStorage.removeItem('bookQuotesAuth');
+        this.stopAutoPlay();
+        this.showLogin();
+        this.showNotification('Logged out successfully! 👋');
+    }
+    
+    showLogin() {
+        document.getElementById('login-page').style.display = 'flex';
+        document.getElementById('app-container').style.display = 'none';
+        this.isLoggedIn = false;
+    }
+    
+    showApp() {
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('app-container').style.display = 'block';
+        this.isLoggedIn = true;
+    }
+    
     setupSwipe() {
         let startY = 0;
         const container = document.querySelector('.app-container');
         
         container.addEventListener('touchstart', (e) => {
+            if (!this.isLoggedIn) return;
             startY = e.touches[0].clientY;
         });
         
         container.addEventListener('touchend', (e) => {
+            if (!this.isLoggedIn) return;
             const endY = e.changedTouches[0].clientY;
             const diff = startY - endY;
             
             if (Math.abs(diff) > 50) {
                 if (diff > 0) {
-                    this.nextQuote(); // Swipe up
+                    this.nextQuote();
                 } else {
-                    this.prevQuote(); // Swipe down
+                    this.prevQuote();
                 }
             }
         });
     }
     
     showQuote(index) {
-        if (this.isTransitioning) return;
+        if (this.isTransitioning || !this.isLoggedIn) return;
         
         this.isTransitioning = true;
         let quote;
@@ -190,6 +272,7 @@ class BookQuoteShorts {
     }
     
     nextQuote() {
+        if (!this.isLoggedIn) return;
         let nextIndex;
         if (this.isLikedView) {
             const likedQuotesArray = this.getLikedQuotesArray();
@@ -203,6 +286,7 @@ class BookQuoteShorts {
     }
     
     prevQuote() {
+        if (!this.isLoggedIn) return;
         let prevIndex;
         if (this.isLikedView) {
             const likedQuotesArray = this.getLikedQuotesArray();
@@ -216,6 +300,7 @@ class BookQuoteShorts {
     }
     
     updateProgress() {
+        if (!this.isLoggedIn) return;
         document.querySelector('.progress').style.width = '0%';
         setTimeout(() => {
             document.querySelector('.progress').style.width = '100%';
@@ -223,17 +308,24 @@ class BookQuoteShorts {
     }
     
     startAutoPlay() {
+        if (!this.isLoggedIn) return;
         this.autoPlayInterval = setInterval(() => {
             this.nextQuote();
         }, 8000);
     }
     
-    resetAutoPlay() {
+    stopAutoPlay() {
         clearInterval(this.autoPlayInterval);
+    }
+    
+    resetAutoPlay() {
+        this.stopAutoPlay();
         this.startAutoPlay();
     }
     
     toggleLike(event) {
+        if (!this.isLoggedIn) return;
+        
         const currentQuote = this.isLikedView ? 
             this.getLikedQuotesArray()[this.currentIndex] : 
             this.quotes[this.currentIndex];
@@ -245,7 +337,6 @@ class BookQuoteShorts {
             this.likedQuotes.add(currentQuote.id);
             event.target.classList.add('liked');
             
-            // Animation for like
             event.target.style.transform = 'scale(1.3)';
             setTimeout(() => {
                 event.target.style.transform = 'scale(1)';
@@ -261,6 +352,8 @@ class BookQuoteShorts {
     }
     
     toggleLikedView() {
+        if (!this.isLoggedIn) return;
+        
         if (this.isLikedView) {
             this.showAllQuotes();
         } else {
@@ -307,6 +400,8 @@ class BookQuoteShorts {
     }
     
     shareQuote(event) {
+        if (!this.isLoggedIn) return;
+        
         const currentQuote = this.isLikedView ? 
             this.getLikedQuotesArray()[this.currentIndex] : 
             this.quotes[this.currentIndex];
@@ -344,14 +439,14 @@ class BookQuoteShorts {
             });
     }
     
-    showNotification(message) {
+    showNotification(message, isError = false) {
         const notification = document.createElement('div');
         notification.style.cssText = `
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: ${isError ? 'rgba(220, 53, 69, 0.9)' : 'rgba(0, 0, 0, 0.8)'};
             color: white;
             padding: 20px 30px;
             border-radius: 10px;
